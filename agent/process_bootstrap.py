@@ -78,6 +78,22 @@ class _SafeWriter:
     catches both OSError and ValueError. It is transparent when the wrapped
     stream is healthy.
     """
+    """透明的 stdio 包装器，用于捕获 broken pipe 引发的 OSError/ValueError。
+
+    当 hermes-agent 作为 systemd 服务、Docker 容器或无头守护进程运行时，
+    stdout/stderr 管道可能会变得不可用（空闲超时、缓冲区耗尽、socket 重置）。
+    此时任何 print() 调用都会抛出
+    ``OSError: [Errno 5] Input/output error``，这可能导致 agent 初始化或
+    run_conversation() 崩溃——尤其是在 except 处理器也尝试 print 时，
+    可能触发二次故障。
+
+    此外，当 subagent 在 ThreadPoolExecutor 线程中运行时，共享的 stdout
+    句柄可能在线程结束和清理之间被关闭，从而抛出
+    ``ValueError: I/O operation on closed file``，而不是 OSError。
+
+    该包装器会将所有写入操作委托给底层 stream，并静默捕获 OSError 和
+    ValueError。当被包装的 stream 正常可用时，它是透明的。
+    """
 
     __slots__ = ("_inner",)
 
