@@ -1,0 +1,22 @@
+services:
+  learning-platform:
+    build:
+      context: ../..
+      dockerfile: apps/learning-platform/Dockerfile
+    init: true
+    restart: unless-stopped
+    ports:
+      - "4317:4317"
+    environment:
+      LEARNING_ADMIN_PASSWORD: ${LEARNING_ADMIN_PASSWORD:?Set LEARNING_ADMIN_PASSWORD in the shell or a local .env file}
+      GIT_AUTHOR_NAME: ${GIT_AUTHOR_NAME:-Learning Platform}
+      GIT_AUTHOR_EMAIL: ${GIT_AUTHOR_EMAIL:-learning-platform@localhost}
+      GIT_COMMITTER_NAME: ${GIT_COMMITTER_NAME:-Learning Platform}
+      GIT_COMMITTER_EMAIL: ${GIT_COMMITTER_EMAIL:-learning-platform@localhost}
+    volumes:
+      - ../../docs:/workspace/docs
+      - ../../.git:/workspace/.git
+      - learning-platform-data:/data
+
+volumes:
+  learning-platform-data:

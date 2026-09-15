@@ -1,0 +1,44 @@
+version: 1
+spaces:
+  - id: hermes-agent-harness
+    slug: hermes
+    title: Hermes Agent Harness
+    description: 从运行时、上下文、工具、持久化到多入口产品边缘，系统学习一个长期运行 Agent Harness 的工程设计。
+    category: Agent Harness
+    tags: [Agent Loop, Tools, Memory, Runtime]
+    contentRoot: docs/agent-harness-learning
+    entryDocument: README.md
+    status: published
+    featured: true
+    order: 10
+    accent: cyan
+    createdAt: 2026-09-12T00:00:00+08:00
+    updatedAt: 2026-09-13T00:00:00+08:00
+  - id: vllm-inference
+    slug: vllm
+    title: vLLM 推理系统
+    description: 围绕调度、PagedAttention、KV Cache、分布式执行与性能分析建立可追踪的推理系统知识地图。
+    category: Inference Systems
+    tags: [vLLM, Inference, CUDA, Performance]
+    contentRoot: docs/learning-spaces/vllm
+    entryDocument: README.md
+    status: published
+    featured: true
+    order: 20
+    accent: violet
+    createdAt: 2026-09-13T00:00:00+08:00
+    updatedAt: 2026-09-13T00:00:00+08:00
+  - id: stanford-cs336
+    slug: cs336
+    title: Stanford CS336
+    description: 按课程脉络整理语言模型从数据、训练、并行计算到评测的概念、作业与实验复盘。
+    category: LLM Courses
+    tags: [LLM, Training, Systems, Coursework]
+    contentRoot: docs/learning-spaces/cs336
+    entryDocument: README.md
+    status: published
+    featured: true
+    order: 30
+    accent: amber
+    createdAt: 2026-09-13T00:00:00+08:00
+    updatedAt: 2026-09-13T00:00:00+08:00
