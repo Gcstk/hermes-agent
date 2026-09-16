@@ -87,7 +87,8 @@ hermes_cli/web_dist/
 apps/desktop/build/
 apps/desktop/dist/
 apps/learning-platform/.next/
-apps/learning-platform/.data/
+apps/learning-platform/.data/*
+!apps/learning-platform/.data/learning-platform.sqlite
 
 # tsc-emitted artifacts (a stray `tsc -b` compiles into src/, and vite then
 # resolves the stale .js OVER the .tsx — never track these)

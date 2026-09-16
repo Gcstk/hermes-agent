@@ -11,7 +11,7 @@ npm install
 npm run dev --workspace @hermes/learning-platform
 ```
 
-随后打开 `http://127.0.0.1:4317`。首次启动会在 `apps/learning-platform/.data/` 创建本地 SQLite 数据库；它已被 Git 忽略，不会进入提交。
+随后打开 `http://127.0.0.1:4317`。首次启动会在 `apps/learning-platform/.data/` 创建本地 SQLite 数据库。项目会跟踪 `learning-platform.sqlite`，使个人学习进度、草稿和批注可随 Git 在机器间同步；SQLite 的运行时 `-wal` 与 `-shm` 文件仍会被忽略。
 
 ## 本地开发
 
