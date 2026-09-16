@@ -36,7 +36,7 @@ docs/
 └── learning-spaces/<spaceSlug>/
 ```
 
-`LEARNING_REPO_ROOT` 只用于部署时定位仓库；本地开发会从当前目录向上寻找同时拥有 `package.json` 和 `.git` 的根目录。任何内容路径最终都必须重新验证仍处在允许目录中。
+应用暂时位于 Hermes monorepo，但部署合同不依赖该位置。`LEARNING_CONTENT_ROOT` 定义 catalog 与文章的唯一文件系统边界，`LEARNING_CATALOG_PATH` 和 `LEARNING_NEW_SPACES_PATH` 都是相对该边界的路径；`LEARNING_DATA_DIR` 独立保存 SQLite。只有启用后台 Git 发布时才设置 `LEARNING_GIT_ROOT`，且内容目录必须位于该工作树内。本地开发可以省略这些设置并自动发现 checkout，生产部署应全部显式挂载。任何内容路径最终都必须重新验证仍在内容边界内，Git 路径还要再次验证仍在工作树内。
 
 ## 核心对象
 
@@ -113,12 +113,7 @@ spaces:
     order: 10
 ```
 
-`contentRoot` 不能是绝对路径，也不能通过 `..` 或符号链接离开以下根：
-
-- `docs/agent-harness-learning/`
-- `docs/learning-spaces/`
-
-后台创建的新模块固定进入第二个根，不接受任意文件系统路径。
+`contentRoot` 不能是绝对路径，也不能通过 `..` 或符号链接离开 `LEARNING_CONTENT_ROOT`。后台创建的新模块固定进入 `LEARNING_NEW_SPACES_PATH`，不接受请求传入任意文件系统路径。这样 catalog 的逻辑路径保持稳定，而实际内容卷可以位于任意绝对路径。
 
 ## 内容读取与渲染
 

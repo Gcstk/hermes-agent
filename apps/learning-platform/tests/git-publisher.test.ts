@@ -8,7 +8,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 const run = promisify(execFile)
 
 afterEach(() => {
-  delete process.env.LEARNING_REPO_ROOT
+  delete process.env.LEARNING_CONTENT_ROOT
+  delete process.env.LEARNING_GIT_ROOT
   vi.resetModules()
 })
 
@@ -27,7 +28,8 @@ describe('exact Git publication', () => {
     await writeFile(path.join(root, 'unrelated.txt'), 'user work\n')
     await run('git', ['add', 'unrelated.txt'], { cwd: root })
 
-    process.env.LEARNING_REPO_ROOT = root
+    process.env.LEARNING_CONTENT_ROOT = root
+    process.env.LEARNING_GIT_ROOT = root
     vi.resetModules()
     const { commitExact } = await import('@/lib/git-publisher')
     await commitExact(['content.md'], 'publish content')
@@ -53,7 +55,8 @@ describe('exact Git publication', () => {
     await run('git', ['commit', '-m', 'second version'], { cwd: root })
     const secondRevision = (await run('git', ['rev-parse', 'HEAD'], { cwd: root })).stdout.trim()
 
-    process.env.LEARNING_REPO_ROOT = root
+    process.env.LEARNING_CONTENT_ROOT = root
+    process.env.LEARNING_GIT_ROOT = root
     vi.resetModules()
     const { fileHistory, readFileAtRevision } = await import('@/lib/git-publisher')
 

@@ -4,7 +4,7 @@ import path from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 afterEach(() => {
-  delete process.env.LEARNING_REPO_ROOT
+  delete process.env.LEARNING_CONTENT_ROOT
   delete process.env.LEARNING_SKIP_GIT_COMMIT
   vi.resetModules()
 })
@@ -18,7 +18,7 @@ describe('catalog-only expansion', () => {
     await mkdir(path.join(root, 'docs', 'agent-harness-learning'), { recursive: true })
     await writeFile(path.join(root, 'package.json'), '{}')
     await writeFile(path.join(root, 'docs', 'learning-platform', 'catalog.yaml'), 'version: 1\nspaces: []\n')
-    process.env.LEARNING_REPO_ROOT = root
+    process.env.LEARNING_CONTENT_ROOT = root
     process.env.LEARNING_SKIP_GIT_COMMIT = '1'
     vi.resetModules()
     const { createLearningSpace } = await import('@/lib/admin-content')

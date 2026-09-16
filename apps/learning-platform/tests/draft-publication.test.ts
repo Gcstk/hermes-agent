@@ -10,7 +10,8 @@ import type { LearningSpace } from '@/lib/types'
 const run = promisify(execFile)
 
 afterEach(() => {
-  delete process.env.LEARNING_REPO_ROOT
+  delete process.env.LEARNING_CONTENT_ROOT
+  delete process.env.LEARNING_GIT_ROOT
   delete process.env.LEARNING_DATA_DIR
   vi.resetModules()
 })
@@ -32,7 +33,8 @@ describe('draft and publication protocol', () => {
     await run('git', ['add', '.'], { cwd: root })
     await run('git', ['commit', '-m', 'baseline'], { cwd: root })
 
-    process.env.LEARNING_REPO_ROOT = root
+    process.env.LEARNING_CONTENT_ROOT = root
+    process.env.LEARNING_GIT_ROOT = root
     process.env.LEARNING_DATA_DIR = data
     vi.resetModules()
     const { getDocument } = await import('@/lib/content')

@@ -139,9 +139,13 @@ npm run dev --workspace @hermes/learning-platform
 
 ```bash
 export LEARNING_ADMIN_PASSWORD='使用密码管理器生成的长密码'
-export LEARNING_REPO_ROOT='/workspace'
+export LEARNING_CONTENT_ROOT='/srv/learning-content'
+export LEARNING_CATALOG_PATH='docs/learning-platform/catalog.yaml'
+export LEARNING_NEW_SPACES_PATH='docs/learning-spaces'
 export LEARNING_DATA_DIR='/data'
 ```
+
+只读部署到此即可。需要后台发布时再设置 `LEARNING_GIT_ROOT='/srv/learning-content'`，并保证内容路径位于该 Git 工作树中。应用镜像、内容挂载和 SQLite 数据卷不需要共享父目录。
 
 只有秘密放入环境变量；站点标题、模块顺序、分类和内容行为继续由 YAML/Markdown 管理。
 

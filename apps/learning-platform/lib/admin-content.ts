@@ -6,8 +6,8 @@ import { z } from 'zod'
 
 import { readCatalog, writeCatalog } from '@/lib/catalog'
 import { getDocument } from '@/lib/content'
-import { commitExact, readFileAtRevision } from '@/lib/git-publisher'
-import { assertAllowedContentRoot, newSpaceRoot, toRepositoryRelative } from '@/lib/paths'
+import { assertGitPublishingAvailable, commitExact, readFileAtRevision } from '@/lib/git-publisher'
+import { assertAllowedContentRoot, catalogRelativePath, newSpaceRelativeRoot, newSpaceRoot } from '@/lib/paths'
 import type { LearningSpace, SpaceStatus } from '@/lib/types'
 
 export const createSpaceSchema = z.object({
@@ -42,11 +42,12 @@ function hashSource(source: string): string {
 }
 
 export async function createLearningSpace(input: z.infer<typeof createSpaceSchema>): Promise<{ space: LearningSpace; revision: string }> {
+  assertGitPublishingAvailable()
   const values = createSpaceSchema.parse(input)
   const catalog = await readCatalog()
   if (catalog.spaces.some((space) => space.slug === values.slug)) throw new Error('这个 slug 已被使用')
   const now = new Date().toISOString()
-  const contentRoot = `docs/learning-spaces/${values.slug}`
+  const contentRoot = `${newSpaceRelativeRoot.split(path.sep).join('/')}/${values.slug}`
   const absoluteRoot = path.join(newSpaceRoot, values.slug)
   await mkdir(absoluteRoot, { recursive: false })
   assertAllowedContentRoot(contentRoot)
@@ -76,7 +77,7 @@ export async function createLearningSpace(input: z.infer<typeof createSpaceSchem
   await atomicWrite(path.join(absoluteRoot, 'README.md'), readme)
   await writeCatalog({ ...catalog, spaces: [...catalog.spaces, space] })
   const revision = await commitExact([
-    'docs/learning-platform/catalog.yaml',
+    catalogRelativePath,
     `${contentRoot}/README.md`,
   ], `docs(learning): create ${values.title} space`)
   return { space, revision }
@@ -87,6 +88,7 @@ export async function updateSpaceStatus(spaceId: string, status: SpaceStatus): P
 }
 
 export async function updateLearningSpace(spaceId: string, input: z.infer<typeof updateSpaceSchema>): Promise<{ space: LearningSpace; revision: string }> {
+  assertGitPublishingAvailable()
   const values = updateSpaceSchema.parse(input)
   const catalog = await readCatalog()
   const index = catalog.spaces.findIndex((space) => space.id === spaceId)
@@ -96,7 +98,7 @@ export async function updateLearningSpace(spaceId: string, input: z.infer<typeof
   const spaces = [...catalog.spaces]
   spaces[index] = space
   await writeCatalog({ ...catalog, spaces })
-  const revision = await commitExact(['docs/learning-platform/catalog.yaml'], `docs(learning): update ${space.title}`)
+  const revision = await commitExact([catalogRelativePath], `docs(learning): update ${space.title}`)
   return { space, revision }
 }
 
@@ -117,6 +119,7 @@ export async function saveDraft(space: LearningSpace, documentId: string, source
 }
 
 export async function publishDraft(space: LearningSpace, documentId: string, commitMessage: string): Promise<{ revision: string; documentRevision: string }> {
+  assertGitPublishingAvailable()
   const { getDatabase } = await import('@/lib/db')
   const draft = getDatabase().prepare('SELECT base_revision, source, format FROM document_drafts WHERE space_id = ? AND document_id = ?').get(space.id, documentId) as { base_revision: string; source: string; format: string } | undefined
   if (!draft) throw new Error('没有可发布的草稿')
@@ -133,19 +136,19 @@ export async function publishDraft(space: LearningSpace, documentId: string, com
   const parsed = matter(currentRaw)
   const nextRaw = matter.stringify(draft.source.trimEnd() + '\n', parsed.data)
   await atomicWrite(absolutePath, nextRaw)
-  const repositoryPath = toRepositoryRelative(absolutePath)
-  const revision = await commitExact([repositoryPath], commitMessage.trim() || `docs(learning): update ${document.title}`)
+  const revision = await commitExact([`${space.contentRoot}/${document.path}`], commitMessage.trim() || `docs(learning): update ${document.title}`)
   getDatabase().prepare('DELETE FROM document_drafts WHERE space_id = ? AND document_id = ?').run(space.id, documentId)
   return { revision, documentRevision: hashSource(nextRaw) }
 }
 
 export async function restoreDocument(space: LearningSpace, documentId: string, revision: string): Promise<{ revision: string }> {
+  assertGitPublishingAvailable()
   const document = await getDocument(space, documentId, { includeUnpublished: true })
   if (!document) throw new Error('文档不存在')
   const absolutePath = path.join(assertAllowedContentRoot(space.contentRoot), document.path)
-  const repositoryPath = toRepositoryRelative(absolutePath)
-  const historical = await readFileAtRevision(revision, repositoryPath)
+  const contentPath = `${space.contentRoot}/${document.path}`
+  const historical = await readFileAtRevision(revision, contentPath)
   await atomicWrite(absolutePath, historical)
-  const nextRevision = await commitExact([repositoryPath], `docs(learning): restore ${document.title} from ${revision.slice(0, 8)}`)
+  const nextRevision = await commitExact([contentPath], `docs(learning): restore ${document.title} from ${revision.slice(0, 8)}`)
   return { revision: nextRevision }
 }
